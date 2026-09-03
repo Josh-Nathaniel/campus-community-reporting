@@ -68,18 +68,22 @@ function initCreateReportPage() {
 }
 
 // =============================================================================
-// STUDENT MY REPORTS LIST VIEW (reports.html)
+// STUDENT CAMPUS & COMMUNITY REPORTS LIST VIEW (reports.html)
 // =============================================================================
 async function initReportsListPage() {
   const user = requireAuth("student");
   if (!user) return;
   renderNavbar("reports");
 
+  const filterScope = document.getElementById("filter-scope");
   const filterStatus = document.getElementById("filter-status");
   const filterCategory = document.getElementById("filter-category");
+  const filterSearch = document.getElementById("filter-search");
 
+  if (filterScope) filterScope.addEventListener("change", applyReportFilters);
   if (filterStatus) filterStatus.addEventListener("change", applyReportFilters);
   if (filterCategory) filterCategory.addEventListener("change", applyReportFilters);
+  if (filterSearch) filterSearch.addEventListener("input", applyReportFilters);
 
   await loadStudentReports(user.id);
 }
@@ -91,11 +95,12 @@ async function loadStudentReports(userId) {
   container.innerHTML = `
     <div class="loading-block">
       <div class="spinner spinner-dark"></div>
-      <p>Fetching your reports...</p>
+      <p>Fetching campus community reports...</p>
     </div>
   `;
 
-  const response = await apiGet("reports", { user_id: userId, role: "student" });
+  // Fetch all reports across campus
+  const response = await apiGet("reports", { role: "student", scope: "all" });
 
   if (!response.success) {
     container.innerHTML = `
@@ -111,16 +116,39 @@ async function loadStudentReports(userId) {
 }
 
 function applyReportFilters() {
+  const user = getCurrentUser();
+  const scopeVal = document.getElementById("filter-scope") ? document.getElementById("filter-scope").value : "all";
   const statusVal = document.getElementById("filter-status") ? document.getElementById("filter-status").value : "";
   const catVal = document.getElementById("filter-category") ? document.getElementById("filter-category").value : "";
+  const searchVal = document.getElementById("filter-search") ? document.getElementById("filter-search").value.trim().toLowerCase() : "";
   const container = document.getElementById("reports-table-container");
 
   let filtered = allLoadedReports;
+
+  // Scope filter (All campus reports vs My reports only)
+  if (scopeVal === "mine" && user) {
+    filtered = filtered.filter(r => String(r.user_id) === String(user.id));
+  }
+
+  // Status filter
   if (statusVal) {
     filtered = filtered.filter(r => r.status === statusVal);
   }
+
+  // Category filter
   if (catVal) {
     filtered = filtered.filter(r => r.category === catVal);
+  }
+
+  // Search keyword filter (title, description, or author name)
+  if (searchVal) {
+    filtered = filtered.filter(r => {
+      const titleMatch = (r.title || "").toLowerCase().includes(searchVal);
+      const descMatch = (r.description || "").toLowerCase().includes(searchVal);
+      const authorMatch = (r.user_name || "").toLowerCase().includes(searchVal);
+      const idMatch = (r.id || "").toLowerCase().includes(searchVal);
+      return titleMatch || descMatch || authorMatch || idMatch;
+    });
   }
 
   if (filtered.length === 0) {
@@ -128,26 +156,34 @@ function applyReportFilters() {
       <div class="empty-state">
         <div class="empty-state-icon">🔍</div>
         <div class="empty-state-title">No matching reports found</div>
-        <p>Try adjusting your category or status filter.</p>
+        <p>Try adjusting your search query, scope, or filters.</p>
       </div>
     `;
     return;
   }
 
-  const rowsHtml = filtered.map(r => `
-    <tr>
-      <td><strong>#${r.id}</strong></td>
-      <td>
-        <a href="report-details.html?id=${r.id}" style="font-weight: 600;">${r.title}</a>
-      </td>
-      <td><span class="badge badge-category">${r.category}</span></td>
-      <td>${getStatusBadge(r.status)}</td>
-      <td style="color: var(--text-muted); font-size: 0.85rem;">${formatDate(r.created_at)}</td>
-      <td>
-        <a href="report-details.html?id=${r.id}" class="btn btn-outline btn-sm">Details</a>
-      </td>
-    </tr>
-  `).join("");
+  const rowsHtml = filtered.map(r => {
+    const isMine = user && String(r.user_id) === String(user.id);
+    const authorDisplay = isMine
+      ? `<span>${r.user_name || "You"} <span class="badge badge-you">You</span></span>`
+      : `<span>${r.user_name || "Student"}</span>`;
+
+    return `
+      <tr>
+        <td><strong>#${r.id}</strong></td>
+        <td>
+          <a href="report-details.html?id=${r.id}" style="font-weight: 600;">${r.title}</a>
+        </td>
+        <td><span class="badge badge-category">${r.category}</span></td>
+        <td>${getStatusBadge(r.status)}</td>
+        <td>${authorDisplay}</td>
+        <td style="color: var(--text-muted); font-size: 0.85rem;">${formatDate(r.created_at)}</td>
+        <td>
+          <a href="report-details.html?id=${r.id}" class="btn btn-outline btn-sm">Details</a>
+        </td>
+      </tr>
+    `;
+  }).join("");
 
   container.innerHTML = `
     <div class="table-responsive">
@@ -158,6 +194,7 @@ function applyReportFilters() {
             <th>Title</th>
             <th>Category</th>
             <th>Status</th>
+            <th>Reported By</th>
             <th>Submitted</th>
             <th>Action</th>
           </tr>
@@ -213,12 +250,13 @@ async function loadReportDetails(reportId, user) {
   }
 
   const { report, comments } = response.data;
+  const isMine = String(report.user_id) === String(user.id);
 
   // Render Report Header and Body
   container.innerHTML = `
     <div style="margin-bottom: 1rem;">
       <a href="${user.role === 'admin' ? 'admin-reports.html' : 'reports.html'}" class="btn btn-outline btn-sm">
-        ← Back to ${user.role === 'admin' ? 'All Reports' : 'My Reports'}
+        ← Back to ${user.role === 'admin' ? 'All Reports' : 'Campus Reports'}
       </a>
     </div>
 
@@ -235,7 +273,7 @@ async function loadReportDetails(reportId, user) {
 
       <div style="display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
         <div><strong>Category:</strong> <span class="badge badge-category">${report.category}</span></div>
-        <div><strong>Submitted By:</strong> ${report.user_name || "Student"}</div>
+        <div><strong>Submitted By:</strong> <span>${report.user_name || "Student"} ${isMine ? '<span class="badge badge-you">You</span>' : ''}</span></div>
         <div><strong>Submitted Date:</strong> ${formatDateTime(report.created_at)}</div>
         <div><strong>Last Updated:</strong> ${formatDateTime(report.updated_at)}</div>
       </div>
@@ -246,22 +284,22 @@ async function loadReportDetails(reportId, user) {
       </div>
     </div>
 
-    <!-- Discussion Thread Section -->
+    <!-- Community Discussion Thread Section -->
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title">💬 Discussion & Updates</h3>
+        <h3 class="card-title">💬 Community Discussion & Updates</h3>
         <span style="font-size: 0.85rem; color: var(--text-muted);">${(comments || []).length} comments</span>
       </div>
 
       <div id="comments-list">
-        ${renderCommentsList(comments)}
+        ${renderCommentsList(comments, report, user)}
       </div>
 
-      <!-- Add Comment Form -->
+      <!-- Add Comment Form (open to any student or admin) -->
       <form id="add-comment-form" style="margin-top: 1.5rem;">
         <div class="form-group">
-          <label class="form-label" for="comment-text">Add a comment or follow-up:</label>
-          <textarea id="comment-text" class="form-control" placeholder="Type your comment or update here..." style="min-height: 80px;" required></textarea>
+          <label class="form-label" for="comment-text">Add a comment or community note:</label>
+          <textarea id="comment-text" class="form-control" placeholder="Share an update, confirm you noticed this issue, or add details..." style="min-height: 80px;" required></textarea>
         </div>
         <div id="comment-alert"></div>
         <button type="submit" id="comment-submit-btn" class="btn btn-primary btn-sm">Post Comment</button>
@@ -294,7 +332,7 @@ async function loadReportDetails(reportId, user) {
 
     if (res.success) {
       commentInput.value = "";
-      // Refresh report view
+      // Refresh report view to display new comment
       await loadReportDetails(report.id, user);
     } else {
       showAlert(commentAlert, res.message || "Failed to post comment.", "danger");
@@ -302,24 +340,37 @@ async function loadReportDetails(reportId, user) {
   });
 }
 
-function renderCommentsList(comments) {
+function renderCommentsList(comments, report, currentUser) {
   if (!comments || comments.length === 0) {
     return `
       <div style="text-align: center; padding: 1.5rem; color: var(--text-muted); font-size: 0.9rem;">
-        No comments yet. Post the first update below.
+        No comments yet. Be the first to add a note or follow-up below.
       </div>
     `;
   }
 
-  return comments.map(c => `
-    <div class="comment-item">
-      <div class="comment-meta">
-        <span class="comment-author">👤 ${c.user_name || "Community Member"}</span>
-        <span class="comment-time">${formatDateTime(c.created_at)}</span>
+  return comments.map(c => {
+    let badges = "";
+    if (report && String(c.user_id) === String(report.user_id)) {
+      badges += `<span class="badge badge-author">Author</span>`;
+    }
+    if ((c.user_name && c.user_name.toLowerCase().includes("admin")) || c.role === "admin") {
+      badges += `<span class="badge badge-admin-role">Admin</span>`;
+    }
+    if (currentUser && String(c.user_id) === String(currentUser.id)) {
+      badges += `<span class="badge badge-you">You</span>`;
+    }
+
+    return `
+      <div class="comment-item">
+        <div class="comment-meta">
+          <span class="comment-author">👤 ${c.user_name || "Community Member"} ${badges}</span>
+          <span class="comment-time">${formatDateTime(c.created_at)}</span>
+        </div>
+        <div class="comment-body">${c.comment}</div>
       </div>
-      <div class="comment-body">${c.comment}</div>
-    </div>
-  `).join("");
+    `;
+  }).join("");
 }
 
 // Helpers

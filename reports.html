@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Reports — Campus Community Reporting</title>
+  <title>Campus Community Reports — Campus Community Reporting</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -13,8 +13,8 @@
     <div class="container">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
         <div>
-          <h1>My Submitted Reports</h1>
-          <p style="margin-bottom: 0;">Review all campus incident tickets you have reported.</p>
+          <h1>Campus Community Reports</h1>
+          <p style="margin-bottom: 0;">Explore campus issues, track repair progress, and join community discussions.</p>
         </div>
         <div>
           <a href="create-report.html" class="btn btn-primary">➕ New Report</a>
@@ -24,9 +24,16 @@
       <!-- Filters Bar -->
       <div class="card" style="padding: 1rem 1.5rem; margin-bottom: 1.5rem;">
         <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-          <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-muted);">Filter by:</div>
-          
-          <div style="min-width: 180px;">
+          <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-muted);">View:</div>
+
+          <div style="min-width: 190px;">
+            <select id="filter-scope" class="form-control" style="padding: 0.5rem 0.75rem; font-size: 0.9rem; font-weight: 600;">
+              <option value="all">🌐 All Campus Reports</option>
+              <option value="mine">👤 My Reports Only</option>
+            </select>
+          </div>
+
+          <div style="min-width: 160px;">
             <select id="filter-status" class="form-control" style="padding: 0.5rem 0.75rem; font-size: 0.9rem;">
               <option value="">All Statuses</option>
               <option value="Pending">⏳ Pending</option>
@@ -36,7 +43,7 @@
             </select>
           </div>
 
-          <div style="min-width: 180px;">
+          <div style="min-width: 160px;">
             <select id="filter-category" class="form-control" style="padding: 0.5rem 0.75rem; font-size: 0.9rem;">
               <option value="">All Categories</option>
               <option value="Facilities">Facilities</option>
@@ -46,6 +53,10 @@
               <option value="Infrastructure">Infrastructure</option>
               <option value="Other">Other</option>
             </select>
+          </div>
+
+          <div style="flex: 1; min-width: 200px;">
+            <input type="text" id="filter-search" class="form-control" placeholder="🔍 Search reports or author..." style="padding: 0.5rem 0.75rem; font-size: 0.9rem;">
           </div>
         </div>
       </div>

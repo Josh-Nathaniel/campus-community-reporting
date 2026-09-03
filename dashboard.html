@@ -15,7 +15,7 @@
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
         <div>
           <h1 id="welcome-banner" style="margin-bottom: 0.25rem;">Student Dashboard</h1>
-          <p style="margin-bottom: 0;">Track your campus issue reports and stay informed on repairs.</p>
+          <p id="welcome-subtitle" style="margin-bottom: 0;">Campus-wide issue overview, community activity, and repair tracking.</p>
         </div>
         <div>
           <a href="create-report.html" class="btn btn-primary">➕ Submit New Report</a>
@@ -25,28 +25,38 @@
       <!-- Metrics Cards -->
       <div class="metrics-grid">
         <div class="metric-card">
-          <div class="metric-label">Total Submitted</div>
+          <div class="metric-label">Total Campus Reports</div>
           <div class="metric-value" id="metric-total">-</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.35rem;" id="metric-my-contribution">Your reports: 0</div>
         </div>
         <div class="metric-card" style="border-left: 4px solid var(--status-pending-border);">
           <div class="metric-label">⏳ Pending Review</div>
           <div class="metric-value" id="metric-pending" style="color: var(--status-pending-text);">-</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.35rem;" id="metric-my-pending">Yours: 0</div>
         </div>
         <div class="metric-card" style="border-left: 4px solid var(--status-progress-border);">
           <div class="metric-label">🔧 In Progress</div>
           <div class="metric-value" id="metric-progress" style="color: var(--status-progress-text);">-</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.35rem;" id="metric-my-progress">Yours: 0</div>
         </div>
         <div class="metric-card" style="border-left: 4px solid var(--status-resolved-border);">
           <div class="metric-label">✅ Resolved</div>
           <div class="metric-value" id="metric-resolved" style="color: var(--status-resolved-text);">-</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.35rem;" id="metric-my-resolved">Yours: 0</div>
         </div>
       </div>
 
       <!-- Recent Reports Card -->
       <div class="card">
-        <div class="card-header">
-          <h2 class="card-title">Recent Reports</h2>
-          <a href="reports.html" class="btn btn-outline btn-sm">View All Reports →</a>
+        <div class="card-header" style="flex-wrap: wrap; gap: 0.75rem;">
+          <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <h2 class="card-title" id="recent-card-title">Recent Campus Activity</h2>
+            <div class="pill-group">
+              <button type="button" class="pill-btn active" id="btn-scope-all" onclick="switchDashboardScope('all')">🌐 All Campus</button>
+              <button type="button" class="pill-btn" id="btn-scope-mine" onclick="switchDashboardScope('mine')">👤 My Reports</button>
+            </div>
+          </div>
+          <a href="reports.html" class="btn btn-outline btn-sm">Explore All Community Reports →</a>
         </div>
         <div id="recent-reports-container"></div>
       </div>

@@ -1,8 +1,11 @@
 /**
  * STUDENT DASHBOARD LOGIC (dashboard.js)
  * Project: Campus Community Reporting System
- * Role: Loads personal report statistics and recent submissions for the student portal.
+ * Role: Loads campus-wide community reports, personal statistics, and recent activity.
  */
+
+let allDashboardReports = [];
+let currentDashboardScope = "all"; // "all" | "mine"
 
 document.addEventListener("DOMContentLoaded", async () => {
   const user = requireAuth("student");
@@ -25,12 +28,13 @@ async function loadStudentDashboard(user) {
     container.innerHTML = `
       <div class="loading-block">
         <div class="spinner spinner-dark"></div>
-        <p>Loading your campus activity...</p>
+        <p>Loading campus community activity...</p>
       </div>
     `;
   }
 
-  const response = await apiGet("reports", { user_id: user.id, role: "student" });
+  // Fetch campus-wide reports so students can see community metrics and progress
+  const response = await apiGet("reports", { role: "student", scope: "all" });
 
   if (!response.success) {
     if (container) {
@@ -43,49 +47,117 @@ async function loadStudentDashboard(user) {
     return;
   }
 
-  const reports = response.data || [];
+  allDashboardReports = response.data || [];
 
-  // Calculate metrics
-  const totalCount = reports.length;
-  const pendingCount = reports.filter(r => r.status === "Pending").length;
-  const progressCount = reports.filter(r => r.status === "In Progress").length;
-  const resolvedCount = reports.filter(r => r.status === "Resolved").length;
+  // Calculate campus-wide metrics
+  const totalCount = allDashboardReports.length;
+  const pendingCount = allDashboardReports.filter(r => r.status === "Pending").length;
+  const progressCount = allDashboardReports.filter(r => r.status === "In Progress").length;
+  const resolvedCount = allDashboardReports.filter(r => r.status === "Resolved").length;
 
-  document.getElementById("metric-total").textContent = totalCount;
-  document.getElementById("metric-pending").textContent = pendingCount;
-  document.getElementById("metric-progress").textContent = progressCount;
-  document.getElementById("metric-resolved").textContent = resolvedCount;
+  // Calculate personal student contribution metrics
+  const myReports = allDashboardReports.filter(r => String(r.user_id) === String(user.id));
+  const myPending = myReports.filter(r => r.status === "Pending").length;
+  const myProgress = myReports.filter(r => r.status === "In Progress").length;
+  const myResolved = myReports.filter(r => r.status === "Resolved").length;
 
-  // Render recent reports (up to 5)
+  // Update Campus Metrics
+  const totalEl = document.getElementById("metric-total");
+  const pendingEl = document.getElementById("metric-pending");
+  const progressEl = document.getElementById("metric-progress");
+  const resolvedEl = document.getElementById("metric-resolved");
+
+  if (totalEl) totalEl.textContent = totalCount;
+  if (pendingEl) pendingEl.textContent = pendingCount;
+  if (progressEl) progressEl.textContent = progressCount;
+  if (resolvedEl) resolvedEl.textContent = resolvedCount;
+
+  // Update Personal Contribution Counters
+  const myTotalEl = document.getElementById("metric-my-contribution");
+  const myPendingEl = document.getElementById("metric-my-pending");
+  const myProgressEl = document.getElementById("metric-my-progress");
+  const myResolvedEl = document.getElementById("metric-my-resolved");
+
+  if (myTotalEl) myTotalEl.textContent = `Your reports: ${myReports.length}`;
+  if (myPendingEl) myPendingEl.textContent = `Yours: ${myPending}`;
+  if (myProgressEl) myProgressEl.textContent = `Yours: ${myProgress}`;
+  if (myResolvedEl) myResolvedEl.textContent = `Yours: ${myResolved}`;
+
+  renderRecentReports(user);
+}
+
+function switchDashboardScope(scope) {
+  currentDashboardScope = scope;
+  const user = getCurrentUser();
+
+  const btnAll = document.getElementById("btn-scope-all");
+  const btnMine = document.getElementById("btn-scope-mine");
+  const titleEl = document.getElementById("recent-card-title");
+
+  if (btnAll) btnAll.classList.toggle("active", scope === "all");
+  if (btnMine) btnMine.classList.toggle("active", scope === "mine");
+
+  if (titleEl) {
+    titleEl.textContent = scope === "mine" ? "My Recent Submissions" : "Recent Campus Activity";
+  }
+
+  renderRecentReports(user);
+}
+
+function renderRecentReports(user) {
+  const container = document.getElementById("recent-reports-container");
   if (!container) return;
 
-  if (reports.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state-icon">📋</div>
-        <div class="empty-state-title">No reports submitted yet</div>
-        <p>Notice a broken facility, equipment problem, or safety hazard on campus?</p>
-        <a href="create-report.html" class="btn btn-primary">Submit Your First Report</a>
-      </div>
-    `;
+  const filtered = currentDashboardScope === "mine"
+    ? allDashboardReports.filter(r => String(r.user_id) === String(user.id))
+    : allDashboardReports;
+
+  if (filtered.length === 0) {
+    if (currentDashboardScope === "mine") {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">📋</div>
+          <div class="empty-state-title">You haven't submitted any reports yet</div>
+          <p>Notice a broken facility, equipment problem, or safety hazard on campus?</p>
+          <a href="create-report.html" class="btn btn-primary">Submit Your First Report</a>
+        </div>
+      `;
+    } else {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">🏛️</div>
+          <div class="empty-state-title">No campus reports yet</div>
+          <p>Be the first to submit a campus community report.</p>
+          <a href="create-report.html" class="btn btn-primary">Submit a Report</a>
+        </div>
+      `;
+    }
     return;
   }
 
-  const recent = reports.slice(0, 5);
-  const rowsHtml = recent.map(r => `
-    <tr>
-      <td><strong>#${r.id}</strong></td>
-      <td>
-        <a href="report-details.html?id=${r.id}" style="font-weight: 600;">${r.title}</a>
-      </td>
-      <td><span class="badge badge-category">${r.category}</span></td>
-      <td>${getStatusBadge(r.status)}</td>
-      <td style="color: var(--text-muted); font-size: 0.85rem;">${formatDate(r.created_at)}</td>
-      <td>
-        <a href="report-details.html?id=${r.id}" class="btn btn-outline btn-sm">View</a>
-      </td>
-    </tr>
-  `).join("");
+  const recent = filtered.slice(0, 6);
+  const rowsHtml = recent.map(r => {
+    const isMine = String(r.user_id) === String(user.id);
+    const authorDisplay = isMine
+      ? `<span>${r.user_name || "You"} <span class="badge badge-you">You</span></span>`
+      : `<span>${r.user_name || "Student"}</span>`;
+
+    return `
+      <tr>
+        <td><strong>#${r.id}</strong></td>
+        <td>
+          <a href="report-details.html?id=${r.id}" style="font-weight: 600;">${r.title}</a>
+        </td>
+        <td><span class="badge badge-category">${r.category}</span></td>
+        <td>${getStatusBadge(r.status)}</td>
+        <td>${authorDisplay}</td>
+        <td style="color: var(--text-muted); font-size: 0.85rem;">${formatDate(r.created_at)}</td>
+        <td>
+          <a href="report-details.html?id=${r.id}" class="btn btn-outline btn-sm">View</a>
+        </td>
+      </tr>
+    `;
+  }).join("");
 
   container.innerHTML = `
     <div class="table-responsive">
@@ -96,6 +168,7 @@ async function loadStudentDashboard(user) {
             <th>Title</th>
             <th>Category</th>
             <th>Status</th>
+            <th>Reported By</th>
             <th>Date Reported</th>
             <th>Action</th>
           </tr>

@@ -127,7 +127,7 @@ function renderNavbar(activePage = "") {
     // Student Links
     linksHtml = `
       <li><a href="dashboard.html" class="nav-link ${activePage === 'dashboard' ? 'active' : ''}">Dashboard</a></li>
-      <li><a href="reports.html" class="nav-link ${activePage === 'reports' ? 'active' : ''}">My Reports</a></li>
+      <li><a href="reports.html" class="nav-link ${activePage === 'reports' ? 'active' : ''}">Community Reports</a></li>
       <li><a href="create-report.html" class="nav-link ${activePage === 'create-report' ? 'active' : ''}">Submit Report</a></li>
       <li><a href="notifications.html" class="nav-link ${activePage === 'notifications' ? 'active' : ''}">Notifications</a></li>
     `;

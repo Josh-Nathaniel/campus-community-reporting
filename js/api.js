@@ -152,15 +152,17 @@ async function apiPost(action, payload = {}) {
 // =============================================================================
 
 function initMockStore() {
-  if (!localStorage.getItem("mock_users")) {
+  if (!localStorage.getItem("mock_users") || JSON.parse(localStorage.getItem("mock_users") || "[]").length < 3) {
     const initialUsers = [
       { id: "USR-ADM-001", name: "Campus Administrator", email: "admin@campus.edu", password: "Admin@123", role: "admin", created_at: new Date().toISOString() },
-      { id: "USR-STU-001", name: "Alex Rivera", email: "student@campus.edu", password: "Student@123", role: "student", created_at: new Date().toISOString() }
+      { id: "USR-STU-001", name: "Alex Rivera", email: "student@campus.edu", password: "Student@123", role: "student", created_at: new Date().toISOString() },
+      { id: "USR-STU-002", name: "Jordan Lee", email: "jordan@campus.edu", password: "Student@123", role: "student", created_at: new Date().toISOString() },
+      { id: "USR-STU-003", name: "Taylor Chen", email: "taylor@campus.edu", password: "Student@123", role: "student", created_at: new Date().toISOString() }
     ];
     localStorage.setItem("mock_users", JSON.stringify(initialUsers));
   }
 
-  if (!localStorage.getItem("mock_reports")) {
+  if (!localStorage.getItem("mock_reports") || JSON.parse(localStorage.getItem("mock_reports") || "[]").length < 5) {
     const initialReports = [
       {
         id: "REP-101",
@@ -194,12 +196,45 @@ function initMockStore() {
         status: "Resolved",
         created_at: new Date(Date.now() - 3600000 * 48).toISOString(),
         updated_at: new Date(Date.now() - 3600000 * 6).toISOString()
+      },
+      {
+        id: "REP-104",
+        user_id: "USR-STU-002",
+        user_name: "Jordan Lee",
+        title: "Flickering Emergency Exit Light in Library",
+        description: "2nd floor stairway exit sign flickers constantly and makes a buzzing sound.",
+        category: "Safety",
+        status: "Pending",
+        created_at: new Date(Date.now() - 3600000 * 18).toISOString(),
+        updated_at: new Date(Date.now() - 3600000 * 18).toISOString()
+      },
+      {
+        id: "REP-105",
+        user_id: "USR-STU-003",
+        user_name: "Taylor Chen",
+        title: "Pothole near Student Center Parking Lot B",
+        description: "Large pothole in the entrance lane of Parking Lot B causing traffic slowdown.",
+        category: "Infrastructure",
+        status: "In Progress",
+        created_at: new Date(Date.now() - 3600000 * 30).toISOString(),
+        updated_at: new Date(Date.now() - 3600000 * 4).toISOString()
+      },
+      {
+        id: "REP-106",
+        user_id: "USR-STU-002",
+        user_name: "Jordan Lee",
+        title: "Faulty 3D Printer Extruder in MakerSpace",
+        description: "Printer #2 thermal runaway error triggers during warm up.",
+        category: "Equipment",
+        status: "Resolved",
+        created_at: new Date(Date.now() - 3600000 * 60).toISOString(),
+        updated_at: new Date(Date.now() - 3600000 * 8).toISOString()
       }
     ];
     localStorage.setItem("mock_reports", JSON.stringify(initialReports));
   }
 
-  if (!localStorage.getItem("mock_comments")) {
+  if (!localStorage.getItem("mock_comments") || JSON.parse(localStorage.getItem("mock_comments") || "[]").length < 2) {
     const initialComments = [
       {
         id: "COM-201",
@@ -207,7 +242,23 @@ function initMockStore() {
         user_id: "USR-ADM-001",
         user_name: "Campus Administrator",
         comment: "Technician dispatched to inspect the fuse on Bench 4.",
-        created_at: new Date().toISOString()
+        created_at: new Date(Date.now() - 3600000 * 8).toISOString()
+      },
+      {
+        id: "COM-202",
+        report_id: "REP-101",
+        user_id: "USR-STU-002",
+        user_name: "Jordan Lee",
+        comment: "I saw this leaking today as well during morning lab. The floor is getting slippery.",
+        created_at: new Date(Date.now() - 3600000 * 16).toISOString()
+      },
+      {
+        id: "COM-203",
+        report_id: "REP-105",
+        user_id: "USR-STU-001",
+        user_name: "Alex Rivera",
+        comment: "Thanks for reporting this! Almost hit it with my bike yesterday.",
+        created_at: new Date(Date.now() - 3600000 * 10).toISOString()
       }
     ];
     localStorage.setItem("mock_comments", JSON.stringify(initialComments));
@@ -233,7 +284,7 @@ function handleLocalMockGet(action, params) {
 
   if (action === "reports") {
     let reports = JSON.parse(localStorage.getItem("mock_reports") || "[]");
-    if (params.role !== "admin" && params.user_id) {
+    if (params.scope === "mine" && params.user_id) {
       reports = reports.filter(r => r.user_id === params.user_id);
     }
     return { success: true, message: "Reports loaded (Mock Mode)", data: reports };
@@ -344,8 +395,11 @@ function handleLocalMockPost(action, payload) {
 
   if (action === "createComment") {
     const comments = JSON.parse(localStorage.getItem("mock_comments") || "[]");
+    const reports = JSON.parse(localStorage.getItem("mock_reports") || "[]");
     const users = JSON.parse(localStorage.getItem("mock_users") || "[]");
+    const notifs = JSON.parse(localStorage.getItem("mock_notifs") || "[]");
     const user = users.find(u => u.id === payload.user_id);
+    const report = reports.find(r => r.id === payload.report_id);
     const newComment = {
       id: "COM-" + Date.now().toString().slice(-4),
       report_id: payload.report_id,
@@ -356,6 +410,19 @@ function handleLocalMockPost(action, payload) {
     };
     comments.push(newComment);
     localStorage.setItem("mock_comments", JSON.stringify(comments));
+
+    // Notify report author if commenter is not the author
+    if (report && String(report.user_id) !== String(payload.user_id)) {
+      notifs.unshift({
+        id: "NOTIF-" + Date.now().toString().slice(-4),
+        user_id: report.user_id,
+        message: `${newComment.user_name} commented on your report '${report.title}'.`,
+        is_read: false,
+        created_at: new Date().toISOString()
+      });
+      localStorage.setItem("mock_notifs", JSON.stringify(notifs));
+    }
+
     return { success: true, message: "Comment posted (Mock Mode)", data: newComment };
   }
 
