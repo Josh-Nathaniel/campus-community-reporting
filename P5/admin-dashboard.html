@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — Campus Community Reporting</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="main-header"></header>
+
+  <main class="main-content">
+    <div class="container">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <h1 id="admin-welcome" style="margin-bottom: 0.25rem;">Administrator Control Center</h1>
+          <p style="margin-bottom: 0;">System overview and live incident triage metrics.</p>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+          <a href="admin-reports.html" class="btn btn-primary">🛠️ Triage Reports</a>
+          <a href="admin-users.html" class="btn btn-outline">👥 View Users</a>
+        </div>
+      </div>
+
+      <!-- Admin Metrics Grid -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">Total Campus Reports</div>
+          <div class="metric-value" id="admin-metric-total">-</div>
+        </div>
+        <div class="metric-card" style="border-left: 4px solid var(--status-pending-border);">
+          <div class="metric-label">⏳ Pending Review</div>
+          <div class="metric-value" id="admin-metric-pending" style="color: var(--status-pending-text);">-</div>
+        </div>
+        <div class="metric-card" style="border-left: 4px solid var(--status-progress-border);">
+          <div class="metric-label">🔧 In Progress</div>
+          <div class="metric-value" id="admin-metric-progress" style="color: var(--status-progress-text);">-</div>
+        </div>
+        <div class="metric-card" style="border-left: 4px solid var(--status-resolved-border);">
+          <div class="metric-label">✅ Resolved</div>
+          <div class="metric-value" id="admin-metric-resolved" style="color: var(--status-resolved-text);">-</div>
+        </div>
+        <div class="metric-card" style="border-left: 4px solid var(--status-rejected-border);">
+          <div class="metric-label">❌ Rejected</div>
+          <div class="metric-value" id="admin-metric-rejected" style="color: var(--status-rejected-text);">-</div>
+        </div>
+      </div>
+
+      <!-- Action Required Queue -->
+      <div class="card" style="padding: 0;">
+        <div class="card-header" style="padding: 1.25rem 1.5rem; margin-bottom: 0;">
+          <h2 class="card-title">⚠️ Action Required Queue (Pending & In Progress)</h2>
+          <a href="admin-reports.html" class="btn btn-outline btn-sm">Manage All Reports →</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Reporter</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Submitted</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-urgent-queue">
+              <tr>
+                <td colspan="7" style="text-align: center; padding: 2rem;">Loading urgent queue...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Campus Community Reporting System &copy; 2026 — Administrator View</p>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      initAdminDashboard();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campus Community Reporting System</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="main-header"></header>
+
+  <main class="main-content">
+    <div class="container">
+      <!-- Hero Section -->
+      <div class="card" style="text-align: center; padding: 4rem 2rem; background: linear-gradient(135deg, #1e3a8a 0%, #0d9488 100%); color: #fff; border: none; margin-bottom: 2.5rem;">
+        <h1 style="color: #fff; font-size: 2.75rem; margin-bottom: 1rem;">Make Our Campus Better, Safer, & Smarter</h1>
+        <p style="color: #e2e8f0; font-size: 1.2rem; max-width: 650px; margin: 0 auto 2rem;">
+          Report broken facilities, damaged equipment, sanitation issues, and safety hazards in seconds. Track repair progress in real time.
+        </p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+          <a href="register.html" class="btn btn-secondary" style="font-size: 1.05rem; padding: 0.8rem 1.75rem;">Get Started — Register</a>
+          <a href="login.html" class="btn btn-outline" style="color: #fff; border-color: rgba(255,255,255,0.4); font-size: 1.05rem; padding: 0.8rem 1.75rem;">Sign In</a>
+        </div>
+      </div>
+
+      <!-- Problem & Solution Section -->
+      <div style="margin-bottom: 3rem;">
+        <h2 style="text-align: center; margin-bottom: 2rem;">Common Campus Issues You Can Report</h2>
+        <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+          <div class="card">
+            <h3 style="display: flex; align-items: center; gap: 0.5rem;">🚰 Facilities</h3>
+            <p>Leaking faucets, broken water fountains, door latch defects, restroom fixtures, and HVAC cooling/heating failures.</p>
+          </div>
+          <div class="card">
+            <h3 style="display: flex; align-items: center; gap: 0.5rem;">🔌 Equipment</h3>
+            <p>Faulty lab computers, broken oscilloscopes, projector malfunctions in lecture halls, and defective electrical outlets.</p>
+          </div>
+          <div class="card">
+            <h3 style="display: flex; align-items: center; gap: 0.5rem;">🧹 Sanitation</h3>
+            <p>Overflowing trash bins, hazardous chemical spills in labs, unsanitary restrooms, and hallway clutter obstructing pathways.</p>
+          </div>
+          <div class="card">
+            <h3 style="display: flex; align-items: center; gap: 0.5rem;">🚨 Safety & Security</h3>
+            <p>Flickering emergency lighting, broken handrails, exposed wiring, slippery walkways, and emergency call box issues.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- How it Works Section -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">How the System Works</h2>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; text-align: center; padding: 1rem 0;">
+          <div>
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">1️⃣</div>
+            <h4 style="margin-bottom: 0.5rem;">Submit a Report</h4>
+            <p style="font-size: 0.9rem;">Fill out a quick form describing the problem, select a category, and submit your ticket.</p>
+          </div>
+          <div>
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">2️⃣</div>
+            <h4 style="margin-bottom: 0.5rem;">Admin Triage</h4>
+            <p style="font-size: 0.9rem;">Campus administrators review the report, assign technicians, and set status to "In Progress".</p>
+          </div>
+          <div>
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">3️⃣</div>
+            <h4 style="margin-bottom: 0.5rem;">Live Resolution</h4>
+            <p style="font-size: 0.9rem;">Receive automatic in-app alerts as repairs are completed and tickets marked "Resolved".</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Campus Community Reporting System &copy; 2026 — Built by Computer Engineering Students</p>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      renderNavbar("home");
+    });
+  </script>
+</body>
+</html>

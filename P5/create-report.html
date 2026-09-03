@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Submit a Report — Campus Community Reporting</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="main-header"></header>
+
+  <main class="main-content">
+    <div class="container" style="max-width: 680px;">
+      <div style="margin-bottom: 1.5rem;">
+        <a href="dashboard.html" class="btn btn-outline btn-sm">← Back to Dashboard</a>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h1 style="font-size: 1.5rem; margin-bottom: 0.25rem;">Submit a Campus Issue Report</h1>
+            <p style="margin-bottom: 0;">Provide detailed information so facilities staff can resolve the problem promptly.</p>
+          </div>
+        </div>
+
+        <div id="form-alert"></div>
+
+        <form id="create-report-form">
+          <div class="form-group">
+            <label class="form-label" for="report-title">Report Title *</label>
+            <input type="text" id="report-title" class="form-control" placeholder="e.g. Leaking pipe in Room EN-304" required minlength="3" maxlength="100">
+            <small style="color: var(--text-muted); font-size: 0.8rem;">Provide a concise summary (max 100 characters).</small>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="report-category">Issue Category *</label>
+            <select id="report-category" class="form-control" required>
+              <option value="" disabled selected>-- Select a Category --</option>
+              <option value="Facilities">🚰 Facilities (Plumbing, Restrooms, HVAC, Doors, Windows)</option>
+              <option value="Equipment">🔌 Equipment (Lab Instruments, Computers, Projectors)</option>
+              <option value="Sanitation">🧹 Sanitation (Trash, Spills, Pest Control, Cleanliness)</option>
+              <option value="Safety">🚨 Safety (Emergency Lighting, Handrails, Hazards)</option>
+              <option value="Infrastructure">🏗️ Infrastructure (Pavements, Walkways, Roofing, Stairs)</option>
+              <option value="Other">📌 Other Campus Issue</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="report-desc">Problem Description & Exact Location *</label>
+            <textarea id="report-desc" class="form-control" placeholder="Describe the problem in detail. Include specific room number, bench number, or outdoor landmark..." required minlength="5"></textarea>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem;">
+            <a href="dashboard.html" class="btn btn-outline">Cancel</a>
+            <button type="submit" id="submit-btn" class="btn btn-primary">Submit Report</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Campus Community Reporting System &copy; 2026</p>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/reports.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      initCreateReportPage();
+    });
+  </script>
+</body>
+</html>

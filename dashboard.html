@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard — Campus Community Reporting</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="main-header"></header>
+
+  <main class="main-content">
+    <div class="container">
+      <!-- Welcome Header -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <h1 id="welcome-banner" style="margin-bottom: 0.25rem;">Student Dashboard</h1>
+          <p style="margin-bottom: 0;">Track your campus issue reports and stay informed on repairs.</p>
+        </div>
+        <div>
+          <a href="create-report.html" class="btn btn-primary">➕ Submit New Report</a>
+        </div>
+      </div>
+
+      <!-- Metrics Cards -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">Total Submitted</div>
+          <div class="metric-value" id="metric-total">-</div>
+        </div>
+        <div class="metric-card" style="border-left: 4px solid var(--status-pending-border);">
+          <div class="metric-label">⏳ Pending Review</div>
+          <div class="metric-value" id="metric-pending" style="color: var(--status-pending-text);">-</div>
+        </div>
+        <div class="metric-card" style="border-left: 4px solid var(--status-progress-border);">
+          <div class="metric-label">🔧 In Progress</div>
+          <div class="metric-value" id="metric-progress" style="color: var(--status-progress-text);">-</div>
+        </div>
+        <div class="metric-card" style="border-left: 4px solid var(--status-resolved-border);">
+          <div class="metric-label">✅ Resolved</div>
+          <div class="metric-value" id="metric-resolved" style="color: var(--status-resolved-text);">-</div>
+        </div>
+      </div>
+
+      <!-- Recent Reports Card -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Recent Reports</h2>
+          <a href="reports.html" class="btn btn-outline btn-sm">View All Reports →</a>
+        </div>
+        <div id="recent-reports-container"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Campus Community Reporting System &copy; 2026</p>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

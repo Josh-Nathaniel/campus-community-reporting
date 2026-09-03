@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Directory — Campus Administrator</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="main-header"></header>
+
+  <main class="main-content">
+    <div class="container">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <h1>Registered Users Directory</h1>
+          <p style="margin-bottom: 0;">Audit registered student and campus administrator accounts.</p>
+        </div>
+        <div>
+          <a href="admin-dashboard.html" class="btn btn-outline btn-sm">← Admin Dashboard</a>
+        </div>
+      </div>
+
+      <!-- Users Table Container -->
+      <div class="card" style="padding: 0;">
+        <div id="admin-users-table-container"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Campus Community Reporting System &copy; 2026 — Administrator View</p>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      initAdminUsersPage();
+    });
+  </script>
+</body>
+</html>

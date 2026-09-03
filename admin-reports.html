@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage All Reports — Campus Administrator</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="main-header"></header>
+
+  <main class="main-content">
+    <div class="container">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <h1>Incident Triage & Management</h1>
+          <p style="margin-bottom: 0;">Review, inspect, and update statuses for all submitted campus community reports.</p>
+        </div>
+        <div>
+          <a href="admin-dashboard.html" class="btn btn-outline btn-sm">← Admin Dashboard</a>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="card" style="padding: 1rem 1.5rem; margin-bottom: 1.5rem;">
+        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+          <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-muted);">Filter Queue:</div>
+          
+          <div style="min-width: 180px;">
+            <select id="admin-filter-status" class="form-control" style="padding: 0.5rem 0.75rem; font-size: 0.9rem;">
+              <option value="">All Statuses</option>
+              <option value="Pending">⏳ Pending</option>
+              <option value="In Progress">🔧 In Progress</option>
+              <option value="Resolved">✅ Resolved</option>
+              <option value="Rejected">❌ Rejected</option>
+            </select>
+          </div>
+
+          <div style="min-width: 180px;">
+            <select id="admin-filter-category" class="form-control" style="padding: 0.5rem 0.75rem; font-size: 0.9rem;">
+              <option value="">All Categories</option>
+              <option value="Facilities">Facilities</option>
+              <option value="Equipment">Equipment</option>
+              <option value="Sanitation">Sanitation</option>
+              <option value="Safety">Safety</option>
+              <option value="Infrastructure">Infrastructure</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin Table Container -->
+      <div class="card" style="padding: 0;">
+        <div id="admin-reports-table-container"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Campus Community Reporting System &copy; 2026 — Administrator View</p>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      initAdminReportsPage();
+    });
+  </script>
+</body>
+</html>
