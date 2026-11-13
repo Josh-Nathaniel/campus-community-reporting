@@ -11,8 +11,8 @@ var SPREADSHEET_ID = "";
 // Canonical Schemas for all 4 tables
 var DB_SCHEMAS = {
   Users: ["id", "name", "email", "password_hash", "role", "created_at"],
-  Reports: ["id", "user_id", "title", "description", "category", "status", "created_at", "updated_at"],
-  Comments: ["id", "report_id", "user_id", "comment", "created_at"],
+  Reports: ["id", "user_id", "title", "description", "category", "status", "created_at", "updated_at", "image_url"],
+  Comments: ["id", "report_id", "user_id", "comment", "created_at", "image_url"],
   Notifications: ["id", "user_id", "message", "is_read", "created_at"]
 };
 

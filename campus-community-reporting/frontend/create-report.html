@@ -50,6 +50,22 @@
             <textarea id="report-desc" class="form-control" placeholder="Describe the problem in detail. Include specific room number, bench number, or outdoor landmark..." required minlength="5"></textarea>
           </div>
 
+          <!-- Incident Photo Upload -->
+          <div class="form-group">
+            <label class="form-label">Attach Photo (Optional)</label>
+            <div class="photo-upload-container">
+              <label for="report-photo" class="photo-input-label" id="photo-label">
+                <span>📸</span>
+                <span id="photo-label-text">Select photo from device</span>
+              </label>
+              <input type="file" id="report-photo" accept="image/png, image/jpeg, image/jpg, image/webp" style="display: none;">
+              <small style="display: block; color: var(--text-muted); font-size: 0.8rem; margin-top: 0.35rem;">
+                Supported: JPG, PNG, WebP. Photos are automatically compressed for fast upload.
+              </small>
+              <div id="photo-preview-container" style="display: none;"></div>
+            </div>
+          </div>
+
           <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem;">
             <a href="dashboard.html" class="btn btn-outline">Cancel</a>
             <button type="submit" id="submit-btn" class="btn btn-primary">Submit Report</button>
@@ -67,6 +83,7 @@
 
   <script src="js/api.js"></script>
   <script src="js/auth.js"></script>
+  <script src="js/storage.js"></script>
   <script src="js/reports.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {

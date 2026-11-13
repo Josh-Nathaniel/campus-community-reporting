@@ -8,7 +8,7 @@
 // CENTRAL API CONFIGURATION
 // When deploying to production or demo, paste your Google Apps Script Web App URL here:
 // =============================================================================
-const API_URL = "https://script.google.com/macros/s/AKfycbw93aJrPZ4J0nUrl9cTeTe4NlLeFELI8ShJFaeC3G8omwVkV5bPNBTFedOtasXGwbpV/exec"; // E.g., "https://script.google.com/macros/s/AKfycb.../exec"
+const API_URL = "https://script.google.com/macros/s/AKfycbxrORIy5FAEkzZahjB_EFFODxwR3H2vrlVMC8cb7Sy85APElSG06v1lyKW5nPzPM1k/exec";
 
 /**
  * Resolves the active API URL (checks hardcoded API_URL first, then localStorage override).
@@ -364,7 +364,8 @@ function handleLocalMockPost(action, payload) {
       category: payload.category,
       status: "Pending",
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      image_url: payload.image_url || ""
     };
     reports.unshift(newReport);
     localStorage.setItem("mock_reports", JSON.stringify(reports));
@@ -406,7 +407,8 @@ function handleLocalMockPost(action, payload) {
       user_id: payload.user_id,
       user_name: user ? user.name : "Community Member",
       comment: payload.comment,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      image_url: payload.image_url || ""
     };
     comments.push(newComment);
     localStorage.setItem("mock_comments", JSON.stringify(comments));

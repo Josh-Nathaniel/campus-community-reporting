@@ -163,6 +163,7 @@ function renderAdminTableRows(reports, showStatusChanger = true) {
       <td><strong>#${r.id}</strong></td>
       <td>
         <a href="report-details.html?id=${r.id}" style="font-weight: 600;">${r.title}</a>
+        ${r.image_url ? '<span class="badge-has-photo" title="Photo attached">📷</span>' : ''}
       </td>
       <td>${r.user_name || "Student"}</td>
       <td><span class="badge badge-category">${r.category}</span></td>

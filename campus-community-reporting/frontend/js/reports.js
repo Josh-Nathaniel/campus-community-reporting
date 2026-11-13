@@ -17,8 +17,53 @@ function initCreateReportPage() {
   const form = document.getElementById("create-report-form");
   const alertEl = document.getElementById("form-alert");
   const submitBtn = document.getElementById("submit-btn");
+  const photoInput = document.getElementById("report-photo");
+  const photoPreviewContainer = document.getElementById("photo-preview-container");
+  const photoLabelText = document.getElementById("photo-label-text");
+
+  let selectedPhotoFile = null;
 
   if (!form) return;
+
+  // Handle Photo Selection
+  if (photoInput) {
+    photoInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith("image/")) {
+        showAlert(alertEl, "Please choose a valid image file (JPG, PNG, WebP).", "danger");
+        photoInput.value = "";
+        return;
+      }
+
+      selectedPhotoFile = file;
+      const previewUrl = URL.createObjectURL(file);
+
+      photoPreviewContainer.innerHTML = `
+        <div class="photo-preview-card">
+          <img src="${previewUrl}" alt="Photo Preview">
+          <button type="button" class="btn-remove-photo" id="btn-remove-photo" title="Remove photo">&times;</button>
+          <span class="photo-preview-badge">Ready to upload</span>
+        </div>
+      `;
+      photoPreviewContainer.style.display = "block";
+      if (photoLabelText) photoLabelText.textContent = "Change photo";
+
+      // Attach remove handler
+      const removeBtn = document.getElementById("btn-remove-photo");
+      if (removeBtn) {
+        removeBtn.addEventListener("click", () => {
+          selectedPhotoFile = null;
+          photoInput.value = "";
+          photoPreviewContainer.innerHTML = "";
+          photoPreviewContainer.style.display = "none";
+          if (photoLabelText) photoLabelText.textContent = "Select photo from device";
+          URL.revokeObjectURL(previewUrl);
+        });
+      }
+    });
+  }
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -44,13 +89,40 @@ function initCreateReportPage() {
 
     // Submit state
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span class="spinner"></span> Submitting...';
+
+    let imageUrl = "";
+
+    // Upload photo if selected
+    if (selectedPhotoFile) {
+      submitBtn.innerHTML = '<span class="spinner"></span> Optimizing & uploading photo...';
+      try {
+        const compressedBlob = await compressImage(selectedPhotoFile);
+        const uploadResult = await uploadImageToStorage(compressedBlob, "reports");
+
+        if (!uploadResult.success) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = "Submit Report";
+          showAlert(alertEl, uploadResult.message || "Failed to upload photo. Please try again.", "danger");
+          return;
+        }
+
+        imageUrl = uploadResult.url || "";
+      } catch (uploadErr) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = "Submit Report";
+        showAlert(alertEl, "Photo processing error: " + uploadErr.message, "danger");
+        return;
+      }
+    }
+
+    submitBtn.innerHTML = '<span class="spinner"></span> Submitting report...';
 
     const response = await apiPost("createReport", {
       user_id: user.id,
       title: title,
       category: category,
-      description: description
+      description: description,
+      image_url: imageUrl
     });
 
     submitBtn.disabled = false;
@@ -173,6 +245,7 @@ function applyReportFilters() {
         <td><strong>#${r.id}</strong></td>
         <td>
           <a href="report-details.html?id=${r.id}" style="font-weight: 600;">${r.title}</a>
+          ${r.image_url ? '<span class="badge-has-photo" title="Photo attached">📷</span>' : ''}
         </td>
         <td><span class="badge badge-category">${r.category}</span></td>
         <td>${getStatusBadge(r.status)}</td>
@@ -282,6 +355,16 @@ async function loadReportDetails(reportId, user) {
         <h4 style="margin-bottom: 0.5rem; font-size: 1rem;">Incident Description</h4>
         <p style="white-space: pre-wrap; margin-bottom: 0; color: var(--text-main);">${report.description}</p>
       </div>
+
+      ${report.image_url ? `
+        <div class="report-photo-section">
+          <div class="report-photo-title">Attached Photo:</div>
+          <div class="report-photo-wrapper" onclick="openPhotoLightbox('${report.image_url}')" title="Click to view full photo">
+            <img src="${report.image_url}" alt="Report Photo" loading="lazy">
+            <div class="report-photo-overlay">🔍 Click to zoom</div>
+          </div>
+        </div>
+      ` : ''}
     </div>
 
     <!-- Community Discussion Thread Section -->
@@ -301,11 +384,64 @@ async function loadReportDetails(reportId, user) {
           <label class="form-label" for="comment-text">Add a comment or community note:</label>
           <textarea id="comment-text" class="form-control" placeholder="Share an update, confirm you noticed this issue, or add details..." style="min-height: 80px;" required></textarea>
         </div>
+        <div class="form-group" style="margin-bottom: 0.75rem;">
+          <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+            <label for="comment-photo" class="photo-input-label" style="font-size: 0.85rem; padding: 0.35rem 0.75rem; margin: 0;">
+              <span>📷</span> <span id="comment-photo-text">Attach photo</span>
+            </label>
+            <input type="file" id="comment-photo" accept="image/png, image/jpeg, image/jpg, image/webp" style="display: none;">
+            <div id="comment-photo-preview" style="display: none;"></div>
+          </div>
+        </div>
         <div id="comment-alert"></div>
         <button type="submit" id="comment-submit-btn" class="btn btn-primary btn-sm">Post Comment</button>
       </form>
     </div>
   `;
+
+  // Attach comment photo selection listener
+  const commentPhotoInput = document.getElementById("comment-photo");
+  const commentPhotoPreview = document.getElementById("comment-photo-preview");
+  const commentPhotoText = document.getElementById("comment-photo-text");
+  let selectedCommentPhoto = null;
+
+  if (commentPhotoInput) {
+    commentPhotoInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith("image/")) {
+        const commentAlert = document.getElementById("comment-alert");
+        showAlert(commentAlert, "Please select an image file (JPG, PNG, WebP).", "danger");
+        commentPhotoInput.value = "";
+        return;
+      }
+
+      selectedCommentPhoto = file;
+      const previewUrl = URL.createObjectURL(file);
+      commentPhotoPreview.innerHTML = `
+        <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: var(--surface); border: 1px solid var(--border); padding: 0.25rem 0.5rem; border-radius: var(--radius-sm); font-size: 0.8rem;">
+          <img src="${previewUrl}" style="width: 24px; height: 24px; object-fit: cover; border-radius: 3px;">
+          <span>Photo attached</span>
+          <button type="button" id="btn-remove-comment-photo" style="background: none; border: none; cursor: pointer; color: var(--danger); font-weight: bold;">&times;</button>
+        </div>
+      `;
+      commentPhotoPreview.style.display = "inline-block";
+      if (commentPhotoText) commentPhotoText.textContent = "Change photo";
+
+      const removeBtn = document.getElementById("btn-remove-comment-photo");
+      if (removeBtn) {
+        removeBtn.addEventListener("click", () => {
+          selectedCommentPhoto = null;
+          commentPhotoInput.value = "";
+          commentPhotoPreview.innerHTML = "";
+          commentPhotoPreview.style.display = "none";
+          if (commentPhotoText) commentPhotoText.textContent = "Attach photo";
+          URL.revokeObjectURL(previewUrl);
+        });
+      }
+    });
+  }
 
   // Attach comment submit listener
   const commentForm = document.getElementById("add-comment-form");
@@ -319,12 +455,35 @@ async function loadReportDetails(reportId, user) {
     if (!text) return;
 
     commentBtn.disabled = true;
+
+    let commentImageUrl = "";
+    if (selectedCommentPhoto) {
+      commentBtn.innerHTML = '<span class="spinner"></span> Uploading photo...';
+      try {
+        const compressedBlob = await compressImage(selectedCommentPhoto, 1000, 1000, 0.8);
+        const uploadRes = await uploadImageToStorage(compressedBlob, "comments");
+        if (!uploadRes.success) {
+          commentBtn.disabled = false;
+          commentBtn.innerHTML = "Post Comment";
+          showAlert(commentAlert, uploadRes.message || "Failed to upload attached photo.", "danger");
+          return;
+        }
+        commentImageUrl = uploadRes.url || "";
+      } catch (err) {
+        commentBtn.disabled = false;
+        commentBtn.innerHTML = "Post Comment";
+        showAlert(commentAlert, "Photo compression error: " + err.message, "danger");
+        return;
+      }
+    }
+
     commentBtn.innerHTML = '<span class="spinner"></span> Posting...';
 
     const res = await apiPost("createComment", {
       report_id: report.id,
       user_id: user.id,
-      comment: text
+      comment: text,
+      image_url: commentImageUrl
     });
 
     commentBtn.disabled = false;
@@ -332,6 +491,12 @@ async function loadReportDetails(reportId, user) {
 
     if (res.success) {
       commentInput.value = "";
+      selectedCommentPhoto = null;
+      if (commentPhotoInput) commentPhotoInput.value = "";
+      if (commentPhotoPreview) {
+        commentPhotoPreview.innerHTML = "";
+        commentPhotoPreview.style.display = "none";
+      }
       // Refresh report view to display new comment
       await loadReportDetails(report.id, user);
     } else {
@@ -368,10 +533,56 @@ function renderCommentsList(comments, report, currentUser) {
           <span class="comment-time">${formatDateTime(c.created_at)}</span>
         </div>
         <div class="comment-body">${c.comment}</div>
+        ${c.image_url ? `
+          <div class="comment-attached-photo" onclick="openPhotoLightbox('${c.image_url}')" title="Click to view photo">
+            <img src="${c.image_url}" alt="Comment Attachment" loading="lazy">
+          </div>
+        ` : ''}
       </div>
     `;
   }).join("");
 }
+
+/**
+ * Opens photo lightbox modal for fullscreen inspection.
+ * @param {string} imageUrl
+ */
+function openPhotoLightbox(imageUrl) {
+  if (!imageUrl) return;
+  let lightbox = document.getElementById("photo-lightbox-modal");
+  if (!lightbox) {
+    lightbox = document.createElement("div");
+    lightbox.id = "photo-lightbox-modal";
+    lightbox.className = "image-lightbox";
+    lightbox.innerHTML = `
+      <button type="button" class="image-lightbox-close" onclick="closePhotoLightbox()">&times;</button>
+      <img class="image-lightbox-img" src="" alt="Expanded Photo">
+    `;
+    lightbox.addEventListener("click", (e) => {
+      if (e.target === lightbox) closePhotoLightbox();
+    });
+    document.body.appendChild(lightbox);
+  }
+
+  const img = lightbox.querySelector(".image-lightbox-img");
+  img.src = imageUrl;
+  lightbox.classList.add("active");
+}
+
+/**
+ * Closes the photo lightbox modal.
+ */
+function closePhotoLightbox() {
+  const lightbox = document.getElementById("photo-lightbox-modal");
+  if (lightbox) {
+    lightbox.classList.remove("active");
+  }
+}
+
+// Close lightbox on Escape key
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closePhotoLightbox();
+});
 
 // Helpers
 function showAlert(el, msg, type = "info") {

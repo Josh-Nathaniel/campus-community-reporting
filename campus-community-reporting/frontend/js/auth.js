@@ -149,12 +149,12 @@ function renderNavbar(activePage = "") {
   headerContainer.innerHTML = `
     <nav class="navbar">
       <div class="container nav-container">
-        <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;">
           <a href="${isLoggedIn ? (isAdmin ? 'admin-dashboard.html' : 'dashboard.html') : 'index.html'}" class="nav-brand">
             <span>🏛️ Campus Reporting</span>
             <span class="nav-brand-badge">${isAdmin ? 'ADMIN' : 'COMMUNITY'}</span>
           </a>
-          <span id="api-status-pill" onclick="openApiModal()" style="cursor: pointer; font-size: 0.72rem; padding: 0.2rem 0.55rem; border-radius: var(--radius-full); font-weight: 600; border: 1px solid var(--border); background: var(--surface-subtle); color: var(--text-muted);" title="Click to inspect/configure backend Google Apps Script connection">
+          <span id="api-status-pill" onclick="openApiModal()" style="cursor: pointer; font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: var(--radius-full); font-weight: 600; border: 1px solid var(--border); background: var(--surface-subtle); color: var(--text-muted); white-space: nowrap; flex-shrink: 0;" title="Click to inspect/configure backend Google Apps Script connection">
             🔌 API: <span id="api-status-label">${getApiUrl() ? 'Live Cloud' : 'Local Mock'}</span>
           </span>
         </div>

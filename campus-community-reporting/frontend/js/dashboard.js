@@ -147,6 +147,7 @@ function renderRecentReports(user) {
         <td><strong>#${r.id}</strong></td>
         <td>
           <a href="report-details.html?id=${r.id}" style="font-weight: 600;">${r.title}</a>
+          ${r.image_url ? '<span class="badge-has-photo" title="Photo attached">📷</span>' : ''}
         </td>
         <td><span class="badge badge-category">${r.category}</span></td>
         <td>${getStatusBadge(r.status)}</td>

@@ -58,6 +58,7 @@ function handleCreateReport(data) {
 
   var reportId = generateId("REP");
   var now = new Date().toISOString();
+  var imageUrl = String(data.image_url || data.imageUrl || "").trim();
 
   var newReport = {
     id: reportId,
@@ -67,7 +68,8 @@ function handleCreateReport(data) {
     category: category,
     status: "Pending",
     created_at: now,
-    updated_at: now
+    updated_at: now,
+    image_url: imageUrl
   };
 
   appendRecord("Reports", newReport);
@@ -234,13 +236,15 @@ function handleAddComment(data) {
 
   var commentId = generateId("COM");
   var now = new Date().toISOString();
+  var imageUrl = String(data.image_url || data.imageUrl || "").trim();
 
   var newComment = {
     id: commentId,
     report_id: reportId,
     user_id: userId,
     comment: sanitizeInput(commentText),
-    created_at: now
+    created_at: now,
+    image_url: imageUrl
   };
 
   appendRecord("Comments", newComment);
